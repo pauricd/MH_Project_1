@@ -6,6 +6,7 @@ file:
 """
 
 import random
+
 from Individual import *
 import sys
 from timeit import default_timer as timer
@@ -86,10 +87,42 @@ class BasicTSP:
         pass
 
     def uniformCrossover(self, indA, indB):
-        """
-        Your Uniform Crossover Implementation
-        """
-        pass
+        child = [0] * self.genSize
+        tmpA = {}
+        tmpB = {}
+
+        for i in range(0, self.genSize):
+            if random.random() < 0.5:
+                tmpA[indA.genes[i]] = False
+                tmpB[indB.genes[i]] = False
+            else:
+                tmpA[indA.genes[i]] = True
+                tmpB[indB.genes[i]] = True
+                child.insert(i, indA.genes[i])
+                del child[-1]
+
+        lastAdded = 0
+        for i in range(0, self.genSize):
+
+
+            #only append if A does not have B already that the A also need to be false
+
+            if not (tmpA[indA.genes[i]]):
+
+                for b_counter in range(lastAdded, self.genSize):
+
+                    if not indB.genes[b_counter] in child:
+                        del child[i]
+                        child.insert(i,indB.genes[b_counter])
+                        lastAdded = b_counter
+                        break
+
+            #else :
+            #    child.append(indA.genes[i])
+
+
+        return child
+
 
     def cycleCrossover(self, indA, indB):
         """
@@ -180,12 +213,10 @@ class BasicTSP:
             2. Apply Crossover
             3. Apply Mutation
             """
-            #                  {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'},
-             #                  2: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'random'},
-             #                  3: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'roulette'},
-             #                  4: {'crossover': 'cycle', 'mutation': 'reciprocal', 'selection': 'roulette'},
-             #                  5: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'roulette'},
-             #                  6: {'crossover': 'uniform', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
+
+
+
+
             if config_to_run['selection'] == 'random':
                 indvselection = self.randomSelection()
             elif config_to_run['selection'] == 'random':
@@ -200,7 +231,7 @@ class BasicTSP:
                 childreturn = self.crossover(indvselection[0], indvselection[1])
                 newGeneration = self.generateIndividualFromKeys(childreturn, indvselection[0])
             elif config_to_run['crossover'] == 'uniform':
-                childreturn = self.crossover(indvselection[0], indvselection[1])
+                childreturn = self.uniformCrossover(indvselection[0], indvselection[1])
                 newGeneration = self.generateIndividualFromKeys(childreturn, indvselection[0])
 
             if config_to_run['mutation'] == 'reciprocal':
@@ -239,8 +270,8 @@ class BasicTSP:
         print ("Total iterations: ", self.iteration)
         print ("Best Solution: ", self.best.getFitness())
 
-instances = ["dataset/inst-0.tsp","dataset/inst-13.tsp","dataset/inst-16.tsp"]
-#instances = ["dataset/inst-0.tsp"]
+#instances = ["dataset/inst-0.tsp","dataset/inst-13.tsp","dataset/inst-16.tsp"]
+instances = ["dataset/inst-0.tsp"]
 
 problem_file = sys.argv[1]
 #configurations = {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'},
@@ -249,8 +280,7 @@ problem_file = sys.argv[1]
 #                  4: {'crossover': 'cycle', 'mutation': 'reciprocal', 'selection': 'roulette'},
 #                  5: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'roulette'},
 #                  6: {'crossover': 'uniform', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
-configurations = {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'},
-                  2: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'}}
+configurations = {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'}}
 
 resultsofconfigs = {1: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
                     2: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
