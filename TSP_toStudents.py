@@ -8,6 +8,7 @@ file:
 import random
 from Individual import *
 import sys
+from timeit import default_timer as timer
 import math
 
 class BasicTSP:
@@ -29,6 +30,13 @@ class BasicTSP:
 
         self.readInstance()
         self.initPopulation()
+
+    def generateIndividualFromKeys(self,keys,indv):
+        indv.genes = keys
+        return indv
+
+
+
 
 
     def readInstance(self):
@@ -90,9 +98,19 @@ class BasicTSP:
         pass
     def reciprocalExchangeMutation(self, ind):
         """
-        Your Reciprocal Exchange Mutation implementation
+        Mutate an individual by swaping two cities with certain probability (i.e., mutation rate)
         """
-        pass
+        if random.random() > self.mutationRate:
+            return
+        indexA = random.randint(0, self.genSize-1)
+        indexB = random.randint(0, self.genSize-1)
+
+        tmp = ind.genes[indexA]
+        ind.genes[indexA] = ind.genes[indexB]
+        ind.genes[indexB] = tmp
+
+        ind.computeFitness()
+        self.updateBest(ind)
 
     def scrambleMutation(self, ind):
         """
@@ -148,7 +166,7 @@ class BasicTSP:
         for ind_i in self.population:
             self.matingPool.append( ind_i.copy() )
 
-    def newGeneration(self):
+    def newGeneration(self,config_to_run):
         """
         Creating a new generation
         1. Selection
@@ -162,8 +180,43 @@ class BasicTSP:
             2. Apply Crossover
             3. Apply Mutation
             """
+            #                  {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'},
+             #                  2: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'random'},
+             #                  3: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'roulette'},
+             #                  4: {'crossover': 'cycle', 'mutation': 'reciprocal', 'selection': 'roulette'},
+             #                  5: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'roulette'},
+             #                  6: {'crossover': 'uniform', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
+            if config_to_run['selection'] == 'random':
+                indvselection = self.randomSelection()
+            elif config_to_run['selection'] == 'random':
+                self.rouletteWheel()
+            elif config_to_run['selection'] == 'bestandsecond':
+                print("BEST AND SECOND")
+                #indvselection = self.rouletteWheel()
+                # do best and second
 
-    def GAStep(self):
+
+            if config_to_run['crossover'] == 'cycle':
+                childreturn = self.crossover(indvselection[0], indvselection[1])
+                newGeneration = self.generateIndividualFromKeys(childreturn, indvselection[0])
+            elif config_to_run['crossover'] == 'uniform':
+                childreturn = self.crossover(indvselection[0], indvselection[1])
+                newGeneration = self.generateIndividualFromKeys(childreturn, indvselection[0])
+
+            if config_to_run['mutation'] == 'reciprocal':
+                self.reciprocalExchangeMutation(newGeneration)
+            elif config_to_run['mutation'] == 'scramble':
+                self.mutation(newGeneration)
+
+
+
+            #indvselection = self.randomSelection()
+           # childreturn = self.crossover(indvselection[0], indvselection[1])
+            #newGeneration = self.generateIndividualFromKeys(childreturn,indvselection[0])
+           # self.mutation(newGeneration)
+
+
+    def GAStep(self,config_to_run):
         """
         One step in the GA main algorithm
         1. Updating mating pool with current population
@@ -171,28 +224,88 @@ class BasicTSP:
         """
 
         self.updateMatingPool()
-        self.newGeneration()
+        self.newGeneration(config_to_run)
 
-    def search(self):
+    def search(self,config_to_run):
         """
         General search template.
         Iterates for a given number of steps
         """
         self.iteration = 0
         while self.iteration < self.maxIterations:
-            self.GAStep()
+            self.GAStep(config_to_run)
             self.iteration += 1
 
-        print ("Total iterations: ",self.iteration)
+        print ("Total iterations: ", self.iteration)
         print ("Best Solution: ", self.best.getFitness())
 
-if len(sys.argv) < 2:
-    print ("Error - Incorrect input")
-    print ("Expecting python BasicTSP.py [instance] ")
-    sys.exit(0)
-
+instances = ["dataset/inst-0.tsp","dataset/inst-13.tsp","dataset/inst-16.tsp"]
+#instances = ["dataset/inst-0.tsp"]
 
 problem_file = sys.argv[1]
+#configurations = {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'},
+#                  2: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'random'},
+#                  3: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'roulette'},
+#                  4: {'crossover': 'cycle', 'mutation': 'reciprocal', 'selection': 'roulette'},
+#                  5: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'roulette'},
+#                  6: {'crossover': 'uniform', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
+configurations = {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'},
+                  2: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'}}
 
-ga = BasicTSP(sys.argv[1], 300, 0.1, 500)
-ga.search()
+resultsofconfigs = {1: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
+                    2: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
+                    3: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
+                    4: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
+                    5: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
+                    6: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0}}
+
+resultsofinstances = {}
+
+
+def run(currentinstance):
+    print("======================== Running Instance {0} ===============".format(currentinstance))
+    print(" ")
+    for key, value in configurations.items():
+        print("-----------------Running Configuration where Crossover is: {0[crossover]}, Mutation is: {0[mutation]}  and  Selection is: {0[selection]} -------------".format(value))
+        start = timer()
+        ga = BasicTSP(currentinstance, 300, 0.1, 300)
+        ga.search(value)
+        print("Total iterations: ", ga.iteration)
+        print("Best Solution: ", ga.best.getFitness())
+        end = timer()
+        print(end - start)
+        resultsofconfigs[key]['time'] = end - start
+        resultsofconfigs[key]['iteration'] = ga.iteration
+        resultsofconfigs[key]['fitness'] = ga.best.getFitness()
+        resultsofinstances[currentinstance] = resultsofinstances.get(currentinstance, {})
+        resultsofinstances[currentinstance][key] = resultsofconfigs[key]
+        print("-------------------------------End of configuration run -----------------------------")
+        print(" ")
+    print("===================================== End of Instance run ===============================")
+
+
+def print_results():
+    print("======================== Results for all configurations ====================================================================")
+    print()
+    for instancekey, instancevalue in resultsofinstances.items():
+        print("----------------------------------------Results for Instance  {0}-------------------------------------------------------------------".format(instancekey))
+
+        for resultkey, resultvalue in configurations.items():
+            print("Result for Configuration {0} where Crossover is: {1[crossover]}, Mutation is: {1[mutation]}  and  Selection is: {1[selection]}".format(resultkey, resultvalue))
+            print("Execution time  {0[time]} and the Iteration is {0[iteration]} and the Best Solution is {0[fitness]}".format(instancevalue[resultkey]))
+            print(            "-------------------------------------------------------------------------------------------------------------------")
+    print("======================== End of Results ================================================================================")
+
+
+for instance_number in range(0, len(instances)):
+    print(instances[instance_number])
+    run(instances[instance_number])
+print_results()
+
+
+
+
+
+
+
+
