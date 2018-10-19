@@ -103,10 +103,6 @@ class BasicTSP:
 
         lastAdded = 0
         for i in range(0, self.genSize):
-
-
-            #only append if A does not have B already that the A also need to be false
-
             if not (tmpA[indA.genes[i]]):
 
                 for b_counter in range(lastAdded, self.genSize):
@@ -117,18 +113,65 @@ class BasicTSP:
                         lastAdded = b_counter
                         break
 
-            #else :
-            #    child.append(indA.genes[i])
+        return child
+
+    def cycleCrossover(self, indA, indB):
+
+        child = [0] * self.genSize
+        #First try identify cycles
+
+        tmpA = {}
+        tmpB = {}
+        cycles =  []
+
+        for i in range(0, self.genSize):
+            tmpA[indA.genes[i]] = False
+            tmpB[indB.genes[i]] = False
+            child.insert(i, indA.genes[i])
+            del child[-1]
+        cycle = []
+        cyclecomplete  = False
+        position_control = 0
+        while False in tmpA.values():
+            cyclecomplete = False
+            if position_control == -1:
+                position_control = 0
+                for  key, value in tmpA.items():
+                    if value == False:
+                        break
+                    else:
+                        position_control += 1
+            while not cyclecomplete :
+                if not (tmpA[indA.genes[position_control]]):
+                    cycle.append(indA.genes[position_control])
+                   # cycle.append(indB.genes[position_control])
+                    tmpA[indA.genes[position_control]] = True
+                    tmpB[indB.genes[position_control]] = True
+                    position_control = indA.genes.index(indB.genes[position_control])
+                else:
+                    cyclecomplete = True
+                    position_control = -1
+                    cycles.append(cycle.copy())
+                    cycle = []
+
+                    print(" ")
+        print(" ")
+
+
+
+
+
+
+
+
+
+
 
 
         return child
 
 
-    def cycleCrossover(self, indA, indB):
-        """
-        Your Cycle Crossover Implementation
-        """
-        pass
+
     def reciprocalExchangeMutation(self, ind):
         """
         Mutate an individual by swaping two cities with certain probability (i.e., mutation rate)
@@ -228,7 +271,7 @@ class BasicTSP:
 
 
             if config_to_run['crossover'] == 'cycle':
-                childreturn = self.crossover(indvselection[0], indvselection[1])
+                childreturn = self.cycleCrossover(indvselection[0], indvselection[1])
                 newGeneration = self.generateIndividualFromKeys(childreturn, indvselection[0])
             elif config_to_run['crossover'] == 'uniform':
                 childreturn = self.uniformCrossover(indvselection[0], indvselection[1])
@@ -280,7 +323,7 @@ problem_file = sys.argv[1]
 #                  4: {'crossover': 'cycle', 'mutation': 'reciprocal', 'selection': 'roulette'},
 #                  5: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'roulette'},
 #                  6: {'crossover': 'uniform', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
-configurations = {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'}}
+configurations = {1: {'crossover': 'cycle', 'mutation': 'reciprocal', 'selection': 'random'}}
 
 resultsofconfigs = {1: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
                     2: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
