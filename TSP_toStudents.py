@@ -100,7 +100,9 @@ class BasicTSP:
                 tmpB[indB.genes[i]] = True
                 child.insert(i, indA.genes[i])
                 del child[-1]
-
+        #last add is jus tto save me  extra loops on the B parent
+        #other wise i would be stating from position 0 and looping through
+        #instead i pick up where was left off the last time
         lastAdded = 0
         for i in range(0, self.genSize):
             if not (tmpA[indA.genes[i]]):
@@ -109,7 +111,7 @@ class BasicTSP:
 
                     if not indB.genes[b_counter] in child:
                         del child[i]
-                        child.insert(i,indB.genes[b_counter])
+                        child.insert(i, indB.genes[b_counter])
                         lastAdded = b_counter
                         break
 
@@ -118,6 +120,7 @@ class BasicTSP:
     def cycleCrossover(self, indA, indB):
 
         child = [0] * self.genSize
+
         #First try identify cycles
 
         tmpA = {}
@@ -127,11 +130,11 @@ class BasicTSP:
         for i in range(0, self.genSize):
             tmpA[indA.genes[i]] = False
             tmpB[indB.genes[i]] = False
-            child.insert(i, indA.genes[i])
-            del child[-1]
         cycle = []
         cyclecomplete  = False
         position_control = 0
+        #two while loops, inner look clear a cycle, then outter loops controls a new cycle loop,
+        #End result is that we should have a list of lists containg cycles
         while False in tmpA.values():
             cyclecomplete = False
             if position_control == -1:
@@ -154,20 +157,25 @@ class BasicTSP:
                     cycles.append(cycle.copy())
                     cycle = []
 
-                    print(" ")
-        print(" ")
-
-
-
-
-
-
-
-
-
-
-
-
+        #How to cross over , to do this we will loop on out cycles and
+        #alternating between A to A B to B and A to B and B to A copies.
+        a_to_a_crossover = True
+        for cycle_to_process in cycles[:]:
+            print("A cycle")
+            print(cycle_to_process)
+            if a_to_a_crossover:
+                print("A cycle")
+                for key in cycle_to_process[:]:
+                    insert_position = indA.genes.index(key)
+                    del child[insert_position]
+                    child.insert(insert_position, key)
+                    a_to_a_crossover = False
+            else:
+                for key in cycle_to_process[:]:
+                    insert_position = indB.genes.index(key)
+                    del child[insert_position]
+                    child.insert(insert_position, key)
+                    a_to_a_crossover = True
         return child
 
 
