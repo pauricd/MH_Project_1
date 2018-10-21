@@ -197,9 +197,9 @@ class BasicTSP:
         """
         Your Scramble Mutation implementation
         """
-        print ("Hello")
-        #tmp = ind.genes.copy()
-        tmp =[4,3,2]
+
+        tmp = ind.genes.copy()
+
         if(len(tmp) <3):
             #List too small to do scramble mutations on
             ind.computeFitness()
@@ -210,7 +210,7 @@ class BasicTSP:
         bad_start_point = True
         if (len(tmp) == 3):
             # its small list , just gerrymander the values start is pos 0 and end is start +1
-            endpoint = startpoint
+            endpoint = startpoint +1
             bad_start_point = False
 
         #Check the start poinbt id good, we dont want to too close to the end of the list
@@ -220,13 +220,29 @@ class BasicTSP:
             #make sure the end poit is at least 3 position away from end of list
             if ( (len(tmp)-1) - startpoint) >= 2:
                 endpoint = random.randrange(startpoint + 1, len(tmp) - 1)
-                bad_start_point = False
+                if endpoint != startpoint :
+                    #if the start point and end point are the same try again
+                    bad_start_point = False
+
+        # we should have good start and end points now. Scrame the data between the points
+        new_list_to_scramble = tmp[startpoint:endpoint + 1]
+        scramble_values = random.sample(new_list_to_scramble, len(new_list_to_scramble))
+
+        # Now loop though out list and recplace the scrabmled values between the start and end point
+        for i in range(0, len(tmp)):
+            if i == startpoint:
+                for x in range(0, len(scramble_values)):
+                    tmp.insert(i, scramble_values[x])
+                    del tmp[i+1]
+                    i +=1
+                #break from main loop as no point in going through the the rest of the list as scrambled items have been replaced now
+                break
+        #Scramble has now been completed
+        ind.genes = tmp
+        ind.computeFitness()
+        self.updateBest(ind)
 
 
-            #else would be to try again and get a good start point thats not close to the end of the list
-
-
-        print("end")
     def crossover(self, indA, indB):
         """
         Executes a 1 order crossover and returns a new individual
@@ -315,12 +331,6 @@ class BasicTSP:
             elif config_to_run['mutation'] == 'scramble':
                 self.scrambleMutation(newGeneration)
 
-
-
-            #indvselection = self.randomSelection()
-           # childreturn = self.crossover(indvselection[0], indvselection[1])
-            #newGeneration = self.generateIndividualFromKeys(childreturn,indvselection[0])
-           # self.mutation(newGeneration)
 
 
     def GAStep(self,config_to_run):
