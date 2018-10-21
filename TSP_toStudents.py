@@ -80,6 +80,13 @@ class BasicTSP:
         indB = self.matingPool[ random.randint(0, self.popSize-1) ]
         return [indA, indB]
 
+    def bestandsecondbest(self):
+        tmp = self.matingPool.copy()
+
+        tmp.sort(key=lambda x: x.fitness)
+
+        return [tmp[0],tmp[1]]
+
     def rouletteWheel(self):
 
         tmp = self.matingPool.copy()
@@ -353,9 +360,8 @@ class BasicTSP:
             elif config_to_run['selection'] == 'roulette':
                 indvselection = self.rouletteWheel()
             elif config_to_run['selection'] == 'bestandsecond':
-                print("BEST AND SECOND")
-                #indvselection = self.rouletteWheel()
-                # do best and second
+                indvselection = self.bestandsecondbest()
+
 
 
             if config_to_run['crossover'] == 'cycle':
@@ -419,7 +425,7 @@ problem_file = sys.argv[1]
 #                  4: {'crossover': 'cycle', 'mutation': 'reciprocal', 'selection': 'roulette'},
 #                  5: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'roulette'},
 #                  6: {'crossover': 'uniform', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
-configurations = {1: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'roulette'}}
+configurations = {1: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
 
 resultsofconfigs = {1: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
                     2: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
