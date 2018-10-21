@@ -161,10 +161,7 @@ class BasicTSP:
         #alternating between A to A B to B and A to B and B to A copies.
         a_to_a_crossover = True
         for cycle_to_process in cycles[:]:
-            print("A cycle")
-            print(cycle_to_process)
             if a_to_a_crossover:
-                print("A cycle")
                 for key in cycle_to_process[:]:
                     insert_position = indA.genes.index(key)
                     del child[insert_position]
@@ -200,8 +197,36 @@ class BasicTSP:
         """
         Your Scramble Mutation implementation
         """
-        pass
+        print ("Hello")
+        #tmp = ind.genes.copy()
+        tmp =[4,3,2]
+        if(len(tmp) <3):
+            #List too small to do scramble mutations on
+            ind.computeFitness()
+            self.updateBest(ind)
+            return
+        startpoint = 0
+        endpoint = 0
+        bad_start_point = True
+        if (len(tmp) == 3):
+            # its small list , just gerrymander the values start is pos 0 and end is start +1
+            endpoint = startpoint
+            bad_start_point = False
 
+        #Check the start poinbt id good, we dont want to too close to the end of the list
+        #if it is try again and get a better start point
+        while bad_start_point:
+            startpoint = tmp.index(random.choice(tmp))
+            #make sure the end poit is at least 3 position away from end of list
+            if ( (len(tmp)-1) - startpoint) >= 2:
+                endpoint = random.randrange(startpoint + 1, len(tmp) - 1)
+                bad_start_point = False
+
+
+            #else would be to try again and get a good start point thats not close to the end of the list
+
+
+        print("end")
     def crossover(self, indA, indB):
         """
         Executes a 1 order crossover and returns a new individual
@@ -288,7 +313,7 @@ class BasicTSP:
             if config_to_run['mutation'] == 'reciprocal':
                 self.reciprocalExchangeMutation(newGeneration)
             elif config_to_run['mutation'] == 'scramble':
-                self.mutation(newGeneration)
+                self.scrambleMutation(newGeneration)
 
 
 
@@ -331,7 +356,7 @@ problem_file = sys.argv[1]
 #                  4: {'crossover': 'cycle', 'mutation': 'reciprocal', 'selection': 'roulette'},
 #                  5: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'roulette'},
 #                  6: {'crossover': 'uniform', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
-configurations = {1: {'crossover': 'cycle', 'mutation': 'reciprocal', 'selection': 'random'}}
+configurations = {1: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'random'}}
 
 resultsofconfigs = {1: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
                     2: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
