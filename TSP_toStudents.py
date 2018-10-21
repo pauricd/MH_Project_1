@@ -81,10 +81,45 @@ class BasicTSP:
         return [indA, indB]
 
     def rouletteWheel(self):
-        """
-        Your Roulette Wheel Selection Implementation
-        """
-        pass
+
+        tmp = self.matingPool.copy()
+        totalifitness = 0
+
+        #i will be using the 1/ifitness caculation
+        for i in range(0, self.popSize):
+            currentIndividual = tmp[i]
+            ifitness = 1 / currentIndividual.fitness
+            totalifitness += ifitness
+            #going to use probability on the individual for  ifitness as temp storage
+            #as i will need to calculate the probability using a sum of all ifitness
+            currentIndividual.probability = ifitness
+
+        for i in range(0, self.popSize):
+            currentIndividual = tmp[i]
+            currentIndividual.probability = currentIndividual.probability/totalifitness
+
+
+        tmp.sort(key=lambda x: x.probability)
+
+        range_range = random.random()
+        partialsum = 0
+        for i in range(0, self.popSize):
+            ind = tmp[i]
+            partialsum += ind.probability
+            if partialsum >= range_range:
+                break;
+        indA = ind
+
+        range_range = random.random()
+        partialsum = 0
+        for i in range(0, self.popSize):
+            ind = tmp[i]
+            partialsum += ind.probability
+            if partialsum >= range_range:
+                break;
+        indB = ind
+
+        return [indA, indB]
 
     def uniformCrossover(self, indA, indB):
         child = [0] * self.genSize
@@ -192,6 +227,7 @@ class BasicTSP:
 
         ind.computeFitness()
         self.updateBest(ind)
+        return ind
 
     def scrambleMutation(self, ind):
         """
@@ -241,6 +277,7 @@ class BasicTSP:
         ind.genes = tmp
         ind.computeFitness()
         self.updateBest(ind)
+        return ind
 
 
     def crossover(self, indA, indB):
@@ -282,6 +319,7 @@ class BasicTSP:
 
         ind.computeFitness()
         self.updateBest(ind)
+        return ind
 
     def updateMatingPool(self):
         """
@@ -289,7 +327,7 @@ class BasicTSP:
         """
         self.matingPool = []
         for ind_i in self.population:
-            self.matingPool.append( ind_i.copy() )
+            self.matingPool.append( ind_i.copy())
 
     def newGeneration(self,config_to_run):
         """
@@ -298,6 +336,7 @@ class BasicTSP:
         2. Crossover
         3. Mutation
         """
+        newIndividual = []
         for i in range(0, len(self.population)):
             """
             Depending of your experiment you need to use the most suitable algorithms for:
@@ -311,8 +350,8 @@ class BasicTSP:
 
             if config_to_run['selection'] == 'random':
                 indvselection = self.randomSelection()
-            elif config_to_run['selection'] == 'random':
-                self.rouletteWheel()
+            elif config_to_run['selection'] == 'roulette':
+                indvselection = self.rouletteWheel()
             elif config_to_run['selection'] == 'bestandsecond':
                 print("BEST AND SECOND")
                 #indvselection = self.rouletteWheel()
@@ -327,9 +366,23 @@ class BasicTSP:
                 newGeneration = self.generateIndividualFromKeys(childreturn, indvselection[0])
 
             if config_to_run['mutation'] == 'reciprocal':
-                self.reciprocalExchangeMutation(newGeneration)
+                newIndividual = self.reciprocalExchangeMutation(newGeneration)
             elif config_to_run['mutation'] == 'scramble':
-                self.scrambleMutation(newGeneration)
+                newIndividual = self.scrambleMutation(newGeneration)
+
+
+         #add our new individual to the population only if it is better than its parents
+        if (newIndividual.fitness > indvselection[0].fitness):
+            matingpool_index = self.matingPool.index(indvselection[0])
+            self.matingPool.insert(matingpool_index, newIndividual)
+            del self.matingPool[matingpool_index + 1]
+        elif (newIndividual.fitness > indvselection[1].fitness):
+            matingpool_index = self.matingPool.index(indvselection[0])
+            self.matingPool.insert(matingpool_index, newIndividual)
+            del self.matingPool[matingpool_index + 1]
+
+
+
 
 
 
@@ -356,7 +409,7 @@ class BasicTSP:
         print ("Total iterations: ", self.iteration)
         print ("Best Solution: ", self.best.getFitness())
 
-#instances = ["dataset/inst-0.tsp","dataset/inst-13.tsp","dataset/inst-16.tsp"]
+#instances = ["dataset/inst-13.tsp","dataset/inst-16.tsp"]
 instances = ["dataset/inst-0.tsp"]
 
 problem_file = sys.argv[1]
@@ -366,7 +419,7 @@ problem_file = sys.argv[1]
 #                  4: {'crossover': 'cycle', 'mutation': 'reciprocal', 'selection': 'roulette'},
 #                  5: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'roulette'},
 #                  6: {'crossover': 'uniform', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
-configurations = {1: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'random'}}
+configurations = {1: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'roulette'}}
 
 resultsofconfigs = {1: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
                     2: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
@@ -384,7 +437,7 @@ def run(currentinstance):
     for key, value in configurations.items():
         print("-----------------Running Configuration where Crossover is: {0[crossover]}, Mutation is: {0[mutation]}  and  Selection is: {0[selection]} -------------".format(value))
         start = timer()
-        ga = BasicTSP(currentinstance, 300, 0.1, 300)
+        ga = BasicTSP(currentinstance, 10, 0.1, 300)
         ga.search(value)
         print("Total iterations: ", ga.iteration)
         print("Best Solution: ", ga.best.getFitness())

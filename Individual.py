@@ -19,6 +19,7 @@ class Individual:
         self.genes      = []
         self.genSize    = _size
         self.data       = _data
+        self.probability = 0
 
         self.genes = list(self.data.keys())
 
