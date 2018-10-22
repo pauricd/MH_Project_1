@@ -469,7 +469,7 @@ def run(currentinstance,numberofrepeatingrun,popSize,mutationRate,numberofiterat
 
 
 def print_and_save_results():
-    fName = 'Baseline.csv'
+    fName = 'output.csv'
 
     file = open(fName, 'w')
     print("======================== Results for all configurations ====================================================================")
