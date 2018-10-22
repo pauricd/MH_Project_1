@@ -377,15 +377,16 @@ class BasicTSP:
                 newIndividual = self.scrambleMutation(newGeneration)
 
 
-         #add our new individual to the population only if it is better than its parents
-        if (newIndividual.fitness > indvselection[0].fitness):
-            matingpool_index = self.matingPool.index(indvselection[0])
-            self.matingPool.insert(matingpool_index, newIndividual)
-            del self.matingPool[matingpool_index + 1]
-        elif (newIndividual.fitness > indvselection[1].fitness):
-            matingpool_index = self.matingPool.index(indvselection[0])
-            self.matingPool.insert(matingpool_index, newIndividual)
-            del self.matingPool[matingpool_index + 1]
+            #add our new individual to the population only if it is better than its parents
+            if (newIndividual is not None ):
+                if (newIndividual.fitness > indvselection[0].fitness):
+                    matingpool_index = self.matingPool.index(indvselection[0])
+                    self.matingPool.insert(matingpool_index, newIndividual)
+                    del self.matingPool[matingpool_index + 1]
+                elif (newIndividual.fitness > indvselection[1].fitness):
+                    matingpool_index = self.matingPool.index(indvselection[0])
+                    self.matingPool.insert(matingpool_index, newIndividual)
+                    del self.matingPool[matingpool_index + 1]
 
 
 
@@ -415,17 +416,17 @@ class BasicTSP:
         print ("Total iterations: ", self.iteration)
         print ("Best Solution: ", self.best.getFitness())
 
-#instances = ["dataset/inst-13.tsp","dataset/inst-16.tsp"]
+instances = ["dataset/inst-0.tsp","dataset/inst-13.tsp","dataset/inst-16.tsp"]
 instances = ["dataset/inst-0.tsp"]
 
 problem_file = sys.argv[1]
-#configurations = {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'},
-#                  2: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'random'},
-#                  3: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'roulette'},
-#                  4: {'crossover': 'cycle', 'mutation': 'reciprocal', 'selection': 'roulette'},
-#                  5: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'roulette'},
-#                  6: {'crossover': 'uniform', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
-configurations = {1: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
+configurations = {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'},
+                  2: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'random'},
+                  3: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'roulette'},
+                  4: {'crossover': 'cycle', 'mutation': 'reciprocal', 'selection': 'roulette'},
+                  5: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'roulette'},
+                  6: {'crossover': 'uniform', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
+#onfigurations = {1: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
 
 resultsofconfigs = {1: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
                     2: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
@@ -443,7 +444,7 @@ def run(currentinstance):
     for key, value in configurations.items():
         print("-----------------Running Configuration where Crossover is: {0[crossover]}, Mutation is: {0[mutation]}  and  Selection is: {0[selection]} -------------".format(value))
         start = timer()
-        ga = BasicTSP(currentinstance, 10, 0.1, 300)
+        ga = BasicTSP(currentinstance, 100, 0.1, 300)
         ga.search(value)
         print("Total iterations: ", ga.iteration)
         print("Best Solution: ", ga.best.getFitness())
