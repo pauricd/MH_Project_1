@@ -428,12 +428,13 @@ configurations = {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selecti
                   6: {'crossover': 'uniform', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
 #onfigurations = {1: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
 
-resultsofconfigs = {1: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
-                    2: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
-                    3: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
-                    4: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
-                    5: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
-                    6: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0}}
+#resultsofconfigs = {1: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
+#                    2: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
+#                    3: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
+#                    4: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
+#                    5: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
+#                    6: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0}}
+resultsofconfigs = {}
 
 resultsofinstances = {}
 resultsofrepetations = {}
@@ -454,15 +455,16 @@ def run(currentinstance,numberofrepeatingrun,popSize,mutationRate,numberofiterat
 
             end = timer()
             print(end - start)
-            resultsofconfigs[key]['time'] = end - start
-            resultsofconfigs[key]['iteration'] = ga.iteration
-            resultsofconfigs[key]['fitness'] = ga.best.getFitness()
+            resultsofconfigs[i] = resultsofconfigs.get(i, {})
+            resultsofconfigs[i]['time'] = end - start
+            resultsofconfigs[i]['iteration'] = ga.iteration
+            resultsofconfigs[i]['fitness'] = ga.best.getFitness()
             resultsofinstances[currentinstance] = resultsofinstances.get(currentinstance, {})
             resultsofinstances[currentinstance][key] = resultsofinstances[currentinstance].get(key , {})
             #resultsofinstances[currentinstance][key] = resultsofconfigs[key]
             resultsofinstances[currentinstance][key][i] = resultsofinstances[currentinstance][key].get(i , {})
 
-            resultsofinstances[currentinstance][key][i] = resultsofconfigs[key]
+            resultsofinstances[currentinstance][key][i] = resultsofconfigs[i]
             print("-------------------------------End of configuration run -----------------------------")
             print(" ")
     print("===================================== End of Instance run ===============================")
@@ -483,12 +485,13 @@ def print_and_save_results():
                 print("Run number:, {2} Configuration, {0} , Crossover , {1[crossover]} , Mutation , {1[mutation]} , Selection , {1[selection]}".format(configkey, configvalue, runresultskey))
 
                 print("Execution time,  {0[time]}  ,Iteration , {0[iteration]} , Best Solution , {0[fitness]}".format(runresultsvalue))
-                file.write("Instance: , {3} , Run number:, {2} ,  Configuration, {0} ,  Crossover , {1[crossover]} , Mutation , {1[mutation]} , Selection , {1[selection]} , Execution time,  {4[time]}  ,Iteration , {4[iteration]} , Best Solution , {4[fitness]} \n".format(configkey, configvalue, runresultskey, instancekey, runresultsvalue))
+                file.write("Instance: , Run number:, Configuration,  Crossover ,  Mutation ,  Selection ,  Execution time,  Iterations ,  Best Solution  \n")
+                file.write(" {3},{2},{0},{1[crossover]},{1[mutation]},{1[selection]},{4[time]},{4[iteration]},{4[fitness]} \n".format(configkey, configvalue, runresultskey, instancekey, runresultsvalue))
 
                 print("-------------------------------------------------------------------------------------------------------------------")
     print("======================== End of Results ================================================================================")
 
-numberofrepeatingrun = 3
+numberofrepeatingrun = 1
 popSize = 100
 mutationRate =0.1
 numberofiterations = 300
