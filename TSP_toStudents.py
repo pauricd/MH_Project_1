@@ -417,7 +417,7 @@ class BasicTSP:
         print ("Best Solution: ", self.best.getFitness())
 
 instances = ["dataset/inst-0.tsp","dataset/inst-13.tsp","dataset/inst-16.tsp"]
-instances = ["dataset/inst-0.tsp"]
+#instances = ["dataset/inst-0.tsp"]
 
 problem_file = sys.argv[1]
 configurations = {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'},
@@ -436,47 +436,66 @@ resultsofconfigs = {1: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
                     6: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0}}
 
 resultsofinstances = {}
+resultsofrepetations = {}
 
 
-def run(currentinstance):
+def run(currentinstance,numberofrepeatingrun,popSize,mutationRate,numberofiterations ):
     print("======================== Running Instance {0} ===============".format(currentinstance))
     print(" ")
+    #loop on configurations
     for key, value in configurations.items():
-        print("-----------------Running Configuration where Crossover is: {0[crossover]}, Mutation is: {0[mutation]}  and  Selection is: {0[selection]} -------------".format(value))
-        start = timer()
-        ga = BasicTSP(currentinstance, 100, 0.1, 300)
-        ga.search(value)
-        print("Total iterations: ", ga.iteration)
-        print("Best Solution: ", ga.best.getFitness())
-        end = timer()
-        print(end - start)
-        resultsofconfigs[key]['time'] = end - start
-        resultsofconfigs[key]['iteration'] = ga.iteration
-        resultsofconfigs[key]['fitness'] = ga.best.getFitness()
-        resultsofinstances[currentinstance] = resultsofinstances.get(currentinstance, {})
-        resultsofinstances[currentinstance][key] = resultsofconfigs[key]
-        print("-------------------------------End of configuration run -----------------------------")
-        print(" ")
+        #loop on reperations of configuration
+        for i in range(1, numberofrepeatingrun+1):
+            print("--------------------------------------------Run:, {0} , For Config,   {1} , -----------------------------".format(i,key))
+            print("-----------------Crossover is, {0[crossover]}, Mutation is, {0[mutation]}  , Selection is, {0[selection]} ,-------------".format(value))
+            start = timer()
+            ga = BasicTSP(currentinstance, popSize, mutationRate, numberofiterations)
+            ga.search(value)
+
+            end = timer()
+            print(end - start)
+            resultsofconfigs[key]['time'] = end - start
+            resultsofconfigs[key]['iteration'] = ga.iteration
+            resultsofconfigs[key]['fitness'] = ga.best.getFitness()
+            resultsofinstances[currentinstance] = resultsofinstances.get(currentinstance, {})
+            resultsofinstances[currentinstance][key] = resultsofinstances[currentinstance].get(key , {})
+            #resultsofinstances[currentinstance][key] = resultsofconfigs[key]
+            resultsofinstances[currentinstance][key][i] = resultsofinstances[currentinstance][key].get(i , {})
+
+            resultsofinstances[currentinstance][key][i] = resultsofconfigs[key]
+            print("-------------------------------End of configuration run -----------------------------")
+            print(" ")
     print("===================================== End of Instance run ===============================")
 
 
-def print_results():
+def print_and_save_results():
+    fName = 'Baseline.csv'
+
+    file = open(fName, 'w')
     print("======================== Results for all configurations ====================================================================")
+    file.write("======================== Results for all configurations and instance and runs ====================================================================\n")
     print()
     for instancekey, instancevalue in resultsofinstances.items():
-        print("----------------------------------------Results for Instance  {0}-------------------------------------------------------------------".format(instancekey))
+        print("----------------------------------------Results for Instance,  {0} ,-------------------------------------------------------------------".format(instancekey))
 
-        for resultkey, resultvalue in configurations.items():
-            print("Result for Configuration {0} where Crossover is: {1[crossover]}, Mutation is: {1[mutation]}  and  Selection is: {1[selection]}".format(resultkey, resultvalue))
-            print("Execution time  {0[time]} and the Iteration is {0[iteration]} and the Best Solution is {0[fitness]}".format(instancevalue[resultkey]))
-            print(            "-------------------------------------------------------------------------------------------------------------------")
+        for configkey, configvalue in configurations.items():
+            for runresultskey, runresultsvalue in instancevalue[configkey].items():
+                print("Run number:, {2} Configuration, {0} , Crossover , {1[crossover]} , Mutation , {1[mutation]} , Selection , {1[selection]}".format(configkey, configvalue, runresultskey))
+
+                print("Execution time,  {0[time]}  ,Iteration , {0[iteration]} , Best Solution , {0[fitness]}".format(runresultsvalue))
+                file.write("Instance: , {3} , Run number:, {2} ,  Configuration, {0} ,  Crossover , {1[crossover]} , Mutation , {1[mutation]} , Selection , {1[selection]} , Execution time,  {4[time]}  ,Iteration , {4[iteration]} , Best Solution , {4[fitness]} \n".format(configkey, configvalue, runresultskey, instancekey, runresultsvalue))
+
+                print("-------------------------------------------------------------------------------------------------------------------")
     print("======================== End of Results ================================================================================")
 
-
+numberofrepeatingrun = 3
+popSize = 100
+mutationRate =0.1
+numberofiterations = 300
 for instance_number in range(0, len(instances)):
     print(instances[instance_number])
-    run(instances[instance_number])
-print_results()
+    run(instances[instance_number], numberofrepeatingrun, popSize, mutationRate, numberofiterations )
+print_and_save_results()
 
 
 
