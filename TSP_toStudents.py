@@ -386,11 +386,11 @@ class BasicTSP:
 
             #add our new individual to the population only if it is better than its parents
             if (newIndividual is not None ):
-                if (newIndividual.fitness > indvselection[0].fitness):
+                if (newIndividual.fitness < indvselection[0].fitness):
                     matingpool_index = self.matingPool.index(indvselection[0])
                     self.matingPool.insert(matingpool_index, newIndividual)
                     del self.matingPool[matingpool_index + 1]
-                elif (newIndividual.fitness > indvselection[1].fitness):
+                elif (newIndividual.fitness < indvselection[1].fitness):
                     matingpool_index = self.matingPool.index(indvselection[0])
                     self.matingPool.insert(matingpool_index, newIndividual)
                     del self.matingPool[matingpool_index + 1]
@@ -435,16 +435,11 @@ configurations = {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selecti
                   6: {'crossover': 'uniform', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
 #onfigurations = {1: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
 
-#resultsofconfigs = {1: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
-#                    2: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
-#                    3: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
-#                    4: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
-#                    5: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0},
-#                    6: {'time': 0.0, 'iteration': 0.0, 'fitness': 0.0}}
-resultsofconfigs = {}
+
+
 
 resultsofinstances = {}
-resultsofrepetations = {}
+
 
 
 def run(currentinstance,numberofrepeatingrun,popSize,mutationRate,numberofiterations ):
@@ -455,8 +450,7 @@ def run(currentinstance,numberofrepeatingrun,popSize,mutationRate,numberofiterat
     for key, value in configurations.items():
         #loop on reperations of configuration
         resultsofinstances[currentinstance][key] = {}
-        #PDresultsofconfigs[key] = {}
-        #PDresultsofconfigsrun = {}
+
         for i in range(1, numberofrepeatingrun+1):
             resultsofinstances[currentinstance][key][i] = {}
             print("--------------------------------------------Run:, {0} , For Config,   {1} , -----------------------------".format(i,key))
@@ -471,27 +465,13 @@ def run(currentinstance,numberofrepeatingrun,popSize,mutationRate,numberofiterat
             resultsofinstances[currentinstance][key][i]['iteration'] = ga.iteration
             resultsofinstances[currentinstance][key][i]['fitness'] = ga.best.getFitness()
 
-            #PD resultsofconfigs[i] = resultsofconfigs.get(i, {})
-            #PDresultsofconfigsrun[i] = {}
-            #PDresultsofconfigsrun[i] = {'time': end - start}
-            #PDresultsofconfigsrun[i] = {'iteration' : ga.iteration}
-            #PDresultsofconfigsrun[i] = {'fitness' :  ga.best.getFitness()}
-
-            #PDresultsofconfigs[key] = resultsofconfigsrun[i]
-            #PDresultsofinstances[currentinstance] = resultsofconfigs[key]
-            #PD resultsofinstances[currentinstance] = resultsofinstances.get(currentinstance, {})
-            #PD  resultsofinstances[currentinstance][key] = resultsofinstances[currentinstance].get(key , {})
-            #resultsofinstances[currentinstance][key] = resultsofconfigs[key]
-            #PD resultsofinstances[currentinstance][key][i] = resultsofinstances[currentinstance][key].get(i , {})
-
-            #PD resultsofinstances[currentinstance][key][i] = resultsofconfigs[i]
             print("-------------------------------End of configuration run -----------------------------")
             print(" ")
     print("===================================== End of Instance run ===============================")
 
 
 def print_and_save_results():
-    fName = 'Baseline.csv'
+    fName = 'Output.csv'
 
     file = open(fName, 'w')
     print("======================== Results for all configurations ====================================================================")
@@ -512,7 +492,7 @@ def print_and_save_results():
                 print("-------------------------------------------------------------------------------------------------------------------")
     print("======================== End of Results ================================================================================")
 
-numberofrepeatingrun = 3
+numberofrepeatingrun = 1
 popSize = 100
 mutationRate =0.1
 numberofiterations = 300
