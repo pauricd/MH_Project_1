@@ -1,0 +1,17 @@
+Executed tests:
+        As per assignment spec. 3 instances (inst-0.tsp, inst-13.tsp, inst-16.tsp) run against 6 Configurations (1-6) run 3 times.
+            Population size = 100, Mutation Rate = 0.1 and Iterations = 300
+
+Other Tests:
+        - Increase Iterations count to 600
+        - Decrease Iterations count to 100
+
+        - Increase Mutation Rate to 0.4
+        - Decrease Mutation Rate to 0.001
+
+        - Increase Population Size to 400
+        - Decrease Population size to 30
+
+All these test cases have been able to run, and have yet to come across a situation where it would not run. I did do undocumented run of a Population size of 600 and it ran fine.
+
+I am using a Windows 10 laptop with 32GB of Ram and an i7 processor @2.80GHz, 1TB SSD. So quite a good spec.

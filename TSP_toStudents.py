@@ -433,7 +433,7 @@ configurations = {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selecti
                   4: {'crossover': 'cycle', 'mutation': 'reciprocal', 'selection': 'roulette'},
                   5: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'roulette'},
                   6: {'crossover': 'uniform', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
-#onfigurations = {1: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'bestandsecond'}}
+
 
 
 
