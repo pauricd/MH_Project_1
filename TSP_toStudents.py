@@ -93,6 +93,7 @@ class BasicTSP:
         totalifitness = 0
 
         #i will be using the 1/ifitness caculation
+        #So firat work out the probability and assign to individuals
         for i in range(0, self.popSize):
             currentIndividual = tmp[i]
             ifitness = 1 / currentIndividual.fitness
@@ -107,7 +108,9 @@ class BasicTSP:
 
 
         tmp.sort(key=lambda x: x.probability)
-
+        #Now lets get the vales (2 individuals) with a spin of the wheel
+        # I use two loop shere as i want to get two individuals to pass into
+        #crossover.
         range_range = random.random()
         partialsum = 0
         for i in range(0, self.popSize):
@@ -140,9 +143,12 @@ class BasicTSP:
             else:
                 tmpA[indA.genes[i]] = True
                 tmpB[indB.genes[i]] = True
+                #Start creating the child with parent A genes, we will add Parent B's later
                 child.insert(i, indA.genes[i])
                 del child[-1]
-        #last add is jus tto save me  extra loops on the B parent
+
+        # Now to loop around and add Parent B genes to the child
+        #lastAdded variable in teh nest loop is just to save me  extra loops on the B parent
         #other wise i would be stating from position 0 and looping through
         #instead i pick up where was left off the last time
         lastAdded = 0
@@ -175,8 +181,9 @@ class BasicTSP:
         cycle = []
         cyclecomplete  = False
         position_control = 0
-        #two while loops, inner look clear a cycle, then outter loops controls a new cycle loop,
-        #End result is that we should have a list of lists containg cycles
+        #two while loops, inner look to create a cycle, then outter loops controls a new cycle loop,
+        #The inner while loop will get run in effect first on teh first time processing.
+        #End result is that we should have a list of lists containing  cycles
         while False in tmpA.values():
             cyclecomplete = False
             if position_control == -1:
@@ -199,8 +206,8 @@ class BasicTSP:
                     cycles.append(cycle.copy())
                     cycle = []
 
-        #How to cross over , to do this we will loop on out cycles and
-        #alternating between A to A B to B and A to B and B to A copies.
+        #Now to cross over , to do this we will loop on out cycles and
+        #alternating between A to A, B to B and A to B and B to A copies.
         a_to_a_crossover = True
         for cycle_to_process in cycles[:]:
             if a_to_a_crossover:
@@ -419,7 +426,7 @@ class BasicTSP:
 instances = ["dataset/inst-0.tsp","dataset/inst-13.tsp","dataset/inst-16.tsp"]
 #instances = ["dataset/inst-0.tsp"]
 
-problem_file = sys.argv[1]
+
 configurations = {1: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'random'},
                   2: {'crossover': 'cycle', 'mutation': 'scramble', 'selection': 'random'},
                   3: {'crossover': 'uniform', 'mutation': 'reciprocal', 'selection': 'roulette'},
@@ -444,9 +451,14 @@ def run(currentinstance,numberofrepeatingrun,popSize,mutationRate,numberofiterat
     print("======================== Running Instance {0} ===============".format(currentinstance))
     print(" ")
     #loop on configurations
+    resultsofinstances[currentinstance] = {}
     for key, value in configurations.items():
         #loop on reperations of configuration
+        resultsofinstances[currentinstance][key] = {}
+        #PDresultsofconfigs[key] = {}
+        #PDresultsofconfigsrun = {}
         for i in range(1, numberofrepeatingrun+1):
+            resultsofinstances[currentinstance][key][i] = {}
             print("--------------------------------------------Run:, {0} , For Config,   {1} , -----------------------------".format(i,key))
             print("-----------------Crossover is, {0[crossover]}, Mutation is, {0[mutation]}  , Selection is, {0[selection]} ,-------------".format(value))
             start = timer()
@@ -455,28 +467,37 @@ def run(currentinstance,numberofrepeatingrun,popSize,mutationRate,numberofiterat
 
             end = timer()
             print(end - start)
-            resultsofconfigs[i] = resultsofconfigs.get(i, {})
-            resultsofconfigs[i]['time'] = end - start
-            resultsofconfigs[i]['iteration'] = ga.iteration
-            resultsofconfigs[i]['fitness'] = ga.best.getFitness()
-            resultsofinstances[currentinstance] = resultsofinstances.get(currentinstance, {})
-            resultsofinstances[currentinstance][key] = resultsofinstances[currentinstance].get(key , {})
-            #resultsofinstances[currentinstance][key] = resultsofconfigs[key]
-            resultsofinstances[currentinstance][key][i] = resultsofinstances[currentinstance][key].get(i , {})
+            resultsofinstances[currentinstance][key][i]['time'] = end - start
+            resultsofinstances[currentinstance][key][i]['iteration'] = ga.iteration
+            resultsofinstances[currentinstance][key][i]['fitness'] = ga.best.getFitness()
 
-            resultsofinstances[currentinstance][key][i] = resultsofconfigs[i]
+            #PD resultsofconfigs[i] = resultsofconfigs.get(i, {})
+            #PDresultsofconfigsrun[i] = {}
+            #PDresultsofconfigsrun[i] = {'time': end - start}
+            #PDresultsofconfigsrun[i] = {'iteration' : ga.iteration}
+            #PDresultsofconfigsrun[i] = {'fitness' :  ga.best.getFitness()}
+
+            #PDresultsofconfigs[key] = resultsofconfigsrun[i]
+            #PDresultsofinstances[currentinstance] = resultsofconfigs[key]
+            #PD resultsofinstances[currentinstance] = resultsofinstances.get(currentinstance, {})
+            #PD  resultsofinstances[currentinstance][key] = resultsofinstances[currentinstance].get(key , {})
+            #resultsofinstances[currentinstance][key] = resultsofconfigs[key]
+            #PD resultsofinstances[currentinstance][key][i] = resultsofinstances[currentinstance][key].get(i , {})
+
+            #PD resultsofinstances[currentinstance][key][i] = resultsofconfigs[i]
             print("-------------------------------End of configuration run -----------------------------")
             print(" ")
     print("===================================== End of Instance run ===============================")
 
 
 def print_and_save_results():
-    fName = 'output.csv'
+    fName = 'Baseline.csv'
 
     file = open(fName, 'w')
     print("======================== Results for all configurations ====================================================================")
     file.write("======================== Results for all configurations and instance and runs ====================================================================\n")
     print()
+    file.write("Instance: , Run number:, Configuration,  Crossover ,  Mutation ,  Selection ,  Execution time,  Iterations ,  Best Solution  \n")
     for instancekey, instancevalue in resultsofinstances.items():
         print("----------------------------------------Results for Instance,  {0} ,-------------------------------------------------------------------".format(instancekey))
 
@@ -485,13 +506,13 @@ def print_and_save_results():
                 print("Run number:, {2} Configuration, {0} , Crossover , {1[crossover]} , Mutation , {1[mutation]} , Selection , {1[selection]}".format(configkey, configvalue, runresultskey))
 
                 print("Execution time,  {0[time]}  ,Iteration , {0[iteration]} , Best Solution , {0[fitness]}".format(runresultsvalue))
-                file.write("Instance: , Run number:, Configuration,  Crossover ,  Mutation ,  Selection ,  Execution time,  Iterations ,  Best Solution  \n")
+
                 file.write(" {3},{2},{0},{1[crossover]},{1[mutation]},{1[selection]},{4[time]},{4[iteration]},{4[fitness]} \n".format(configkey, configvalue, runresultskey, instancekey, runresultsvalue))
 
                 print("-------------------------------------------------------------------------------------------------------------------")
     print("======================== End of Results ================================================================================")
 
-numberofrepeatingrun = 1
+numberofrepeatingrun = 3
 popSize = 100
 mutationRate =0.1
 numberofiterations = 300
